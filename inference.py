@@ -321,7 +321,7 @@ class ExactInference(InferenceModule):
             game = self.setGhostPosition(gameState, position, self.index)
             new = self.getPositionDistribution(game, position)
             for a, p in new.items():
-                allPossible[new] += p * self.beliefs[position]
+                predictions[a] += p * self.beliefs[position]
         self.beliefs = predictions
 
     def getBeliefDistribution(self):

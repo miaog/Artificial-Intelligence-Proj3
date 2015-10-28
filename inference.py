@@ -103,11 +103,14 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
+        c = self.copy()
+        b = c.normalize()
         a = list()
-        for key, value in self.iteritems():
-            while value != 0:
+        for key, value in c.iteritems():
+            p = value * 100
+            while p!= 0:
                 a.append(key)
-                value = value - 1
+                p = p - 1
         return random.choice(a)
 
 
@@ -313,7 +316,13 @@ class ExactInference(InferenceModule):
         Pacman's current position. However, this is not a problem, as Pacman's
         current position is known.
         """
-        "*** YOUR CODE HERE ***"
+        predictions = util.Counter()
+        for position in self.allPositions:
+            game = self.setGhostPosition(gameState, position, self.index)
+            new = self.getPositionDistribution(game, position)
+            for a, p in new.items():
+                allPossible[new] += p * self.beliefs[position]
+        self.beliefs = predictions
 
     def getBeliefDistribution(self):
         return self.beliefs

@@ -16,6 +16,7 @@ import itertools
 import random
 import busters
 import game
+import util
 
 from util import manhattanDistance
 
@@ -176,7 +177,12 @@ class InferenceModule:
         """
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
+        # print pacmanPosition
+        # print ghostPosition
+        # print jailPosition
+        # print noisyDistance
         trueDistance = manhattanDistance(pacmanPosition, ghostPosition)
+        # print trueDistance
         if noisyDistance == None:
             if ghostPosition == jailPosition:
                 return 1
@@ -297,7 +303,6 @@ class ExactInference(InferenceModule):
             probEvidence = self.getObservationProb(observation, pacmanCurrPosition, position, jailCurrPosition)
             self.beliefs[position] = probEvidence * self.beliefs[position]
         self.beliefs.normalize()
-        
 
     def predict(self, gameState):
         """
@@ -332,7 +337,14 @@ class ParticleFilter(InferenceModule):
         a particle could be located. Particles should be evenly (not randomly)
         distributed across positions in order to ensure a uniform prior.
         """
-        "*** YOUR CODE HERE ***"
+        self.particles = []
+        total = self.numParticles
+        i = 0
+        while i < total:
+            for p in self.legalPositions:
+                if i < total:
+                    self.particles.append(p)
+                    i += 1
 
     def update(self, observation, gameState):
         """
@@ -356,7 +368,11 @@ class ParticleFilter(InferenceModule):
         locations conditioned on all evidence and time passage. This method
         essentially converts a list of particles into a belief distribution.
         """
-        "*** YOUR CODE HERE ***"
+        curr = util.Counter()
+        for i in self.particles:
+            curr[i] += 1
+        curr.normalize()
+        return curr
 
 
 class JointParticleFilter(ParticleFilter):

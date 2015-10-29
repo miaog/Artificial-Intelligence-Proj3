@@ -103,14 +103,19 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
-        c = self.copy()
-        b = c.normalize()
         a = list()
-        for key, value in c.iteritems():
-            p = value * 100
-            while p!= 0:
-                a.append(key)
-                p = p - 1
+        if self.total() != 1:
+            b = self.copy()
+            b.normalize()
+            for key, value in b.iteritems():
+                while value > 0:
+                    a.append(key)
+                    value = value - 0.1
+        else:
+            for key, value in self.iteritems():
+                while value > 0:
+                    a.append(key)
+                    value = value - 0.1
         return random.choice(a)
 
 
@@ -322,7 +327,7 @@ class ExactInference(InferenceModule):
             new = self.getPositionDistribution(game, position)
             for a, p in new.items():
                 predictions[a] += p * self.beliefs[position]
-        self.beliefs = predictions
+        self.beliefs = DiscreteDistribution(predictions)
 
     def getBeliefDistribution(self):
         return self.beliefs
@@ -369,7 +374,11 @@ class ParticleFilter(InferenceModule):
         Sample each particle's next state based on its current state and the
         gameState.
         """
-        "*** YOUR CODE HERE ***"
+        tmpParticles = []
+        for oldPos in self.particles:
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos, self.index), oldPos)
+            tmpParticles.append(newPosDist.sample())
+        self.particles = tmpParticles
 
     def getBeliefDistribution(self):
         """
@@ -380,8 +389,9 @@ class ParticleFilter(InferenceModule):
         curr = util.Counter()
         for i in self.particles:
             curr[i] += 1
-        curr.normalize()
-        return curr
+        b = DiscreteDistribution(curr)
+        b.normalize()
+        return b
 
 
 class JointParticleFilter(ParticleFilter):

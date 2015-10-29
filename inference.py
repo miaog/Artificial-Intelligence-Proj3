@@ -103,11 +103,17 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
-        # randomInt = random.random()
-        # prevCumulativeSum = 0
-        # cumulativeSum = 0
-        # self.normalize()
-        # for key, value i self.
+        randomInt = random.random()
+        prevCumulativeSum = 0
+        cumulativeSum = 0
+        copy = self.copy()
+        copy.normalize()
+        for key, value in copy.iteritems():
+            cumulativeSum += value
+            if randomInt < cumulativeSum and randomInt > prevCumulativeSum:
+                return key
+            else:
+                prevCumulativeSum += value
 
 
 class InferenceModule:
@@ -358,7 +364,25 @@ class ParticleFilter(InferenceModule):
         The observation is the estimated Manhattan distance to the ghost you are
         tracking.
         """
-        "*** YOUR CODE HERE ***"
+        pacmanPosition = gameState.getPacmanPosition()
+        jailPosition = self.getJailPosition()
+        numberParticles = self.numParticles
+
+        particlesDistribution = self.getBeliefDistribution()
+
+        for particle in particlesDistribution:
+            observationProbability = self.getObservationProb(observation, pacmanPosition, particle, jailPosition) * particlesDistribution[particle]
+            particlesDistribution[particle] = observationProbability
+
+        i = 0
+        self.particles = []
+        while i < numberParticles:
+            self.particles.append(particlesDistribution.sample())
+            i+=1
+
+        if particlesDistribution.total() == 0:
+            self.initializeUniformly(gameState)
+       
 
     def predict(self, gameState):
         """
@@ -380,7 +404,6 @@ class ParticleFilter(InferenceModule):
         curr = DiscreteDistribution()
         for i in self.particles:
             curr[i] += 1
-        # b = DiscreteDistribution(curr)
         curr.normalize()
         return curr
 

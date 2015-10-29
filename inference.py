@@ -103,20 +103,11 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
-        a = list()
-        if self.total() != 1:
-            b = self.copy()
-            b.normalize()
-            for key, value in b.iteritems():
-                while value > 0:
-                    a.append(key)
-                    value = value - 0.1
-        else:
-            for key, value in self.iteritems():
-                while value > 0:
-                    a.append(key)
-                    value = value - 0.1
-        return random.choice(a)
+        # randomInt = random.random()
+        # prevCumulativeSum = 0
+        # cumulativeSum = 0
+        # self.normalize()
+        # for key, value i self.
 
 
 class InferenceModule:
@@ -321,13 +312,13 @@ class ExactInference(InferenceModule):
         Pacman's current position. However, this is not a problem, as Pacman's
         current position is known.
         """
-        predictions = util.Counter()
+        predictions = DiscreteDistribution()
         for position in self.allPositions:
             game = self.setGhostPosition(gameState, position, self.index)
             new = self.getPositionDistribution(game, position)
             for a, p in new.items():
                 predictions[a] += p * self.beliefs[position]
-        self.beliefs = DiscreteDistribution(predictions)
+        self.beliefs = predictions
 
     def getBeliefDistribution(self):
         return self.beliefs
@@ -386,12 +377,12 @@ class ParticleFilter(InferenceModule):
         locations conditioned on all evidence and time passage. This method
         essentially converts a list of particles into a belief distribution.
         """
-        curr = util.Counter()
+        curr = DiscreteDistribution()
         for i in self.particles:
             curr[i] += 1
-        b = DiscreteDistribution(curr)
-        b.normalize()
-        return b
+        # b = DiscreteDistribution(curr)
+        curr.normalize()
+        return curr
 
 
 class JointParticleFilter(ParticleFilter):

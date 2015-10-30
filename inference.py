@@ -474,7 +474,26 @@ class JointParticleFilter(ParticleFilter):
         The observation is the estimated Manhattan distances to all ghosts you
         are tracking.
         """
-        "*** YOUR CODE HERE ***"
+        pacmanPosition = gameState.getPacmanPosition()
+
+        particlesDistribution = self.getBeliefDistribution()
+
+        for i in range(self.numGhosts):
+            jailPosition = self.getJailPosition(i)
+
+            for particle in particlesDistribution:
+                observationProbability = self.getObservationProb(observation[i], pacmanPosition, particle[i], jailPosition) * particlesDistribution[particle]
+                particlesDistribution[particle] = observationProbability
+
+        i = 0
+        numberParticles = self.numParticles
+        self.particles = []
+        while i < numberParticles:
+            self.particles.append(particlesDistribution.sample())
+            i+=1
+
+        if particlesDistribution.total() == 0:
+            self.initializeUniformly(gameState)
 
     def predict(self, gameState):
         """
@@ -486,9 +505,10 @@ class JointParticleFilter(ParticleFilter):
             newParticle = list(oldParticle)  # A list of ghost positions
 
             # now loop through and update each entry in newParticle...
-            "*** YOUR CODE HERE ***"
+            for i in range(self.numGhosts):
+                print(newParticle)
+                newPosDist = self.getPositionDistribution(gameState, prevGhostPositions, i, self.ghostAgents[i])
 
-            """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
 

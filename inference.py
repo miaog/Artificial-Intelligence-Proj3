@@ -432,7 +432,11 @@ class JointParticleFilter(ParticleFilter):
         uniform prior.
         """
         #   Get all the permutations
-        prod = itertools.product(self.legalPositions, self.legalPositions)
+        prod = itertools.product(self.legalPositions)
+        numberGhosts = self.numGhosts
+        i = 0
+        while i < numberGhosts:
+            prod = itertools.product(self.legalPositions, prod)
 
         #   Add the permutations to the list
         self.particles = []
@@ -443,7 +447,7 @@ class JointParticleFilter(ParticleFilter):
             for p in prod:
                 self.particles.append(p)
                 j += 1
-            j += 1
+    
         return random.shuffle(self.particles)
 
     def addGhostAgent(self, agent):

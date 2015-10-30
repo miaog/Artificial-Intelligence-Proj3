@@ -431,7 +431,20 @@ class JointParticleFilter(ParticleFilter):
         should be evenly distributed across positions in order to ensure a
         uniform prior.
         """
-        "*** YOUR CODE HERE ***"
+        #   Get all the permutations
+        prod = itertools.product(self.legalPositions, self.legalPositions)
+
+        #   Add the permutations to the list
+        self.particles = []
+        total = self.numParticles
+    
+        j = 0
+        while j < total:
+            for p in prod:
+                self.particles.append(p)
+                j += 1
+            j += 1
+        return random.shuffle(self.particles)
 
     def addGhostAgent(self, agent):
         """
